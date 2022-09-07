@@ -1,5 +1,7 @@
 ﻿using DAL.Data;
 using DAL.Models;
+using Pitchfork.BLL;
+using System.Text;
 
 namespace Pitchfork
 {
@@ -7,7 +9,35 @@ namespace Pitchfork
     {
         public static void Main(string[] args)
         {
-            InsertReviews();
+            // InsertReviews();
+            JoinReviews();
+        }
+
+        private static void JoinReviews()
+        {
+            List<JoinModel> reviews = new List<JoinModel>();
+
+            RecordDataAccess records = new RecordDataAccess();
+
+            reviews = records.Select();
+
+            foreach (var review in reviews)
+            {
+                // Add Record review and Pitchfork review together
+                Utility.JoinReview(review);
+
+                // Insert into Db
+                int recordId = records.UpdateReview(review);
+                Console.WriteLine(recordId);
+
+
+                review.RecordReview = Utility.RemoveLineBreaks(review.RecordReview);
+                Console.WriteLine($"{review.RecordId}\n{review.RecordReview}");
+
+            }
+
+            // Write script to upload records to Azure
+            Utility.WriteAzureScript(reviews);
         }
 
         private static void InsertReviews()
